@@ -3,7 +3,7 @@
 #include <time.h>
 #include <limits.h>
 
-/* Αν δεν δοθεί ακέραιος, το πρόγραμμα σταματά. */
+/* Διαβάζει έναν ακέραιο από το πληκτρολόγιο. */
 int diavase(void)
 {
     int x;
@@ -31,7 +31,7 @@ void gemisma(int *a, int n)
         *(a + i) = 30 + rand() % 471;
 }
 
-/* Το NULL σημαίνει ότι ο πίνακας δεν έχει δημιουργηθεί ακόμα. */
+/* Τυπώνει τον πίνακα, αν έχει δημιουργηθεί. */
 void ektiposi(const int *a, int n, const char *titlos)
 {
     int i;
@@ -53,7 +53,7 @@ int seiriaki(const int *a, int n, int x)
     return -1;
 }
 
-/* Ταξινόμηση με καταμέτρηση: οι τιμές είναι από 30 έως 500. */
+/* Μετράει τις εμφανίσεις των αριθμών και τους γράφει με αύξουσα σειρά. */
 void taxinomisi(int *a, int n)
 {
     int *metritis = calloc(471, sizeof(int));
@@ -100,7 +100,7 @@ int dyadiki(const int *a, int n, int x)
     return -1;
 }
 
-/* Ο δεύτερος πίνακας δημιουργείται και ελευθερώνεται εδώ. */
+/* Δημιουργεί δεύτερο ταξινομημένο πίνακα και συγχωνεύει τους δύο. */
 int *sygxonefsi(const int *a, int n)
 {
     int *b = desmefsi(n);
@@ -128,7 +128,7 @@ int *sygxonefsi(const int *a, int n)
     return c;
 }
 
-/* Αρχείο κειμένου: πρώτα το μέγεθος και μετά τα στοιχεία. */
+/* Αποθηκεύει πρώτα το μέγεθος και μετά τα στοιχεία στο αρχείο. */
 void apothikefsi(const int *a, int n)
 {
     FILE *fp = fopen("pinakas.txt", "w");
@@ -189,7 +189,7 @@ int main(void)
     } while (n <= 0 || n > INT_MAX / 2);
     a = desmefsi(n);
     gemisma(a, n);
-    /* Όπως στο παράδειγμα, δημιουργούμε από την αρχή ταξινομημένο αντίγραφο. */
+    /* Δημιουργεί ταξινομημένο αντίγραφο του αρχικού πίνακα. */
     b = antigrafo(a, n);
 
     do {
