@@ -3,19 +3,14 @@
 #include <time.h>
 #include <limits.h>
 
-/* Διαβάζει έναν ακέραιο και απορρίπτει λανθασμένη είσοδο. */
+/* Αν δεν δοθεί ακέραιος, το πρόγραμμα σταματά. */
 int diavase(void)
 {
-    int x, c, ok;
-    do {
-        ok = scanf("%d", &x);
-        if (ok == EOF)
-            exit(0);
-        while ((c = getchar()) != '\n' && c != EOF) {
-        }
-        if (ok != 1)
-            printf("Δώσε έναν ακέραιο: ");
-    } while (ok != 1);
+    int x;
+    if (scanf("%d", &x) != 1) {
+        printf("Χρειάζεται ακέραιος αριθμός.\n");
+        exit(1);
+    }
     return x;
 }
 
@@ -36,9 +31,13 @@ void gemisma(int *a, int n)
         *(a + i) = 30 + rand() % 471;
 }
 
-void ektiposi(const int *a, int n)
+/* Το NULL σημαίνει ότι ο πίνακας δεν έχει δημιουργηθεί ακόμα. */
+void ektiposi(const int *a, int n, const char *titlos)
 {
     int i;
+    if (a == NULL)
+        return;
+    printf("%s\n", titlos);
     for (i = 0; i < n; i++)
         printf("%d ", *(a + i));
     printf("\n");
@@ -109,8 +108,7 @@ int *sygxonefsi(const int *a, int n)
     int i = 0, j = 0, k = 0;
     gemisma(b, n);
     taxinomisi(b, n);
-    printf("Προσωρινός ταξινομημένος πίνακας:\n");
-    ektiposi(b, n);
+    ektiposi(b, n, "Προσωρινός ταξινομημένος πίνακας:");
 
     while (i < n && j < n) {
         if (*(a + i) <= *(b + j)) {
@@ -122,16 +120,10 @@ int *sygxonefsi(const int *a, int n)
         }
         k++;
     }
-    while (i < n) {
+    for (; i < n; i++, k++)
         *(c + k) = *(a + i);
-        i++;
-        k++;
-    }
-    while (j < n) {
+    for (; j < n; j++, k++)
         *(c + k) = *(b + j);
-        j++;
-        k++;
-    }
     free(b);
     return c;
 }
@@ -140,23 +132,21 @@ int *sygxonefsi(const int *a, int n)
 void apothikefsi(const int *a, int n)
 {
     FILE *fp = fopen("pinakas.txt", "w");
-    int i, ok = 1;
+    int i, sfalma;
     if (fp == NULL) {
         printf("Το αρχείο δεν ανοίγει.\n");
         return;
     }
-    if (fprintf(fp, "%d\n", n) < 0)
-        ok = 0;
-    for (i = 0; i < n; i++) {
-        if (fprintf(fp, "%d\n", *(a + i)) < 0)
-            ok = 0;
-    }
+    fprintf(fp, "%d\n", n);
+    for (i = 0; i < n; i++)
+        fprintf(fp, "%d\n", *(a + i));
+    sfalma = ferror(fp);
     if (fclose(fp) != 0)
-        ok = 0;
-    if (ok)
-        printf("Αποθηκεύτηκε στο pinakas.txt.\n");
-    else
+        sfalma = 1;
+    if (sfalma)
         printf("Η αποθήκευση απέτυχε.\n");
+    else
+        printf("Αποθηκεύτηκε στο pinakas.txt.\n");
 }
 
 int *fortosi(int *n)
@@ -191,7 +181,7 @@ int *fortosi(int *n)
 int main(void)
 {
     int n, epilogi, x, thesi;
-    int *a, *b = NULL, *c = NULL, *neos;
+    int *a, *b, *c = NULL, *neos;
     srand((unsigned int)time(NULL));
     do {
         printf("Μέγεθος πίνακα (θετικός ακέραιος): ");
@@ -199,24 +189,22 @@ int main(void)
     } while (n <= 0 || n > INT_MAX / 2);
     a = desmefsi(n);
     gemisma(a, n);
+    /* Όπως στο παράδειγμα, δημιουργούμε από την αρχή ταξινομημένο αντίγραφο. */
+    b = antigrafo(a, n);
 
     do {
-        printf("\n1. Σειριακή αναζήτηση\n");
-        printf("2. Ταξινόμηση αντιγράφου\n");
-        printf("3. Δυαδική αναζήτηση\n");
-        printf("4. Συγχώνευση\n");
-        printf("5. Εκτύπωση πινάκων\n");
-        printf("6. Αποθήκευση αρχικού πίνακα\n");
-        printf("7. Φόρτωση αρχικού πίνακα\n");
-        printf("0. Έξοδος\nΕπιλογή: ");
+        printf("\n1. Σειριακή αναζήτηση\n"
+               "2. Ταξινόμηση αντιγράφου\n"
+               "3. Δυαδική αναζήτηση\n"
+               "4. Συγχώνευση\n"
+               "5. Εκτύπωση πινάκων\n"
+               "6. Αποθήκευση αρχικού πίνακα\n"
+               "7. Φόρτωση αρχικού πίνακα\n"
+               "0. Έξοδος\nΕπιλογή: ");
         epilogi = diavase();
         switch (epilogi) {
         case 1:
         case 3:
-            if (epilogi == 3 && b == NULL) {
-                printf("Επίλεξε πρώτα ταξινόμηση (2).\n");
-                break;
-            }
             printf("Τιμή προς αναζήτηση: ");
             x = diavase();
             if (epilogi == 1)
@@ -231,29 +219,17 @@ int main(void)
         case 2:
             free(b);
             b = antigrafo(a, n);
-            printf("Το αντίγραφο ταξινομήθηκε.\n");
+            ektiposi(b, n, "Ταξινομημένο αντίγραφο:");
             break;
         case 4:
-            if (b == NULL) {
-                printf("Επίλεξε πρώτα ταξινόμηση (2).\n");
-                break;
-            }
             free(c);
             c = sygxonefsi(b, n);
-            printf("Συγχωνευμένος πίνακας:\n");
-            ektiposi(c, 2 * n);
+            ektiposi(c, 2 * n, "Συγχωνευμένος πίνακας:");
             break;
         case 5:
-            printf("Αρχικός πίνακας:\n");
-            ektiposi(a, n);
-            if (b != NULL) {
-                printf("Ταξινομημένο αντίγραφο:\n");
-                ektiposi(b, n);
-            }
-            if (c != NULL) {
-                printf("Συγχωνευμένος πίνακας:\n");
-                ektiposi(c, 2 * n);
-            }
+            ektiposi(a, n, "Αρχικός πίνακας:");
+            ektiposi(b, n, "Ταξινομημένο αντίγραφο:");
+            ektiposi(c, 2 * n, "Συγχωνευμένος πίνακας:");
             break;
         case 6:
             apothikefsi(a, n);
@@ -265,7 +241,7 @@ int main(void)
                 free(b);
                 free(c);
                 a = neos;
-                b = NULL;
+                b = antigrafo(a, n);
                 c = NULL;
                 printf("Ο πίνακας φορτώθηκε.\n");
             }
